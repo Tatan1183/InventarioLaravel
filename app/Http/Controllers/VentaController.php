@@ -48,5 +48,31 @@ class VentaController extends Controller
 
         return redirect()->route('ventas.index');
     }
+
+    public function resumen()
+    {
+    // Total de ventas
+    $totalVentas = Venta::count();
+
+    // Total en dinero
+    $totalDinero = Venta::sum('total');
+
+    // Producto más vendido
+    $productoMasVendido = Venta::select('producto_id', DB::raw('SUM(cantidad) as total_cantidad'))
+        ->groupBy('producto_id')
+        ->orderByDesc('total_cantidad')
+        ->with('producto') // Para traer nombre del producto
+        ->first();
+
+    // Última venta
+    $ultimaVenta = Venta::orderBy('created_at', 'desc')->first();
+
+    return view('ventas.resumen', compact(
+        'totalVentas',
+        'totalDinero',
+        'productoMasVendido',
+        'ultimaVenta'
+    ));
+    }
 }
 
